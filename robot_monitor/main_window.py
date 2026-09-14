@@ -11,6 +11,7 @@ from PyQt5.QtWidgets import (
 )
 
 from robot_monitor.map_widget import MapWidget
+from robot_monitor.pose_panel import PosePanel
 from robot_monitor.ros_bridge import RosBridge
 
 CONNECTED_STYLE = "color: #2e7d32; font-weight: bold;"
@@ -62,6 +63,8 @@ class MainWindow(QMainWindow):
         body = QHBoxLayout()
         body.addWidget(self._build_camera_column(), 1)
         body.addWidget(self._build_map_panel(), 2)
+        self.pose_panel = PosePanel()
+        body.addWidget(self.pose_panel, 1)
         layout.addLayout(body, 1)
 
         layout.addWidget(self._build_voice_panel())
@@ -71,11 +74,15 @@ class MainWindow(QMainWindow):
         self.bridge.rgb_frame_received.connect(self.rgb_feed.set_frame)
         self.bridge.robot_description_received.connect(self._on_robot_description)
         self.bridge.map_received.connect(self.map_widget.set_map)
-        self.bridge.pose_updated.connect(self.map_widget.set_pose)
+        self.bridge.pose_updated.connect(self._on_pose_updated)
         self.bridge.pose_lost.connect(self.map_widget.clear_pose)
         self.bridge.voice_connected.connect(self._on_voice_connected)
         self.bridge.voice_disconnected.connect(self._on_voice_disconnected)
         self.bridge.voice_message_received.connect(self._on_voice_message)
+
+    def _on_pose_updated(self, pose: dict) -> None:
+        self.map_widget.set_pose(pose["x"], pose["y"], pose["yaw_rad"])
+        self.pose_panel.set_pose(pose)
 
     def _build_header(self) -> QWidget:
         header = QWidget()

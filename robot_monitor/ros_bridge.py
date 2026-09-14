@@ -6,6 +6,7 @@ involved, unlike core/bridge_client.py in the main dashboard.
 
 import json
 import math
+import time
 
 import rclpy
 import rclpy.time
@@ -34,7 +35,10 @@ class RosBridge(QObject):
     rgb_frame_received = pyqtSignal(QImage)
     robot_description_received = pyqtSignal(str)
     map_received = pyqtSignal(object)  # raw nav_msgs/OccupancyGrid
-    pose_updated = pyqtSignal(float, float, float)  # x, y, yaw (radians)
+    # dict: x, y, z, qx, qy, qz, qw, roll, pitch, yaw (degrees), timestamp --
+    # same shape as robot_pose_gui/limo_pose_gui.py's pose dict, so its
+    # numeric readout ports over directly instead of running as a second app.
+    pose_updated = pyqtSignal(dict)
     pose_lost = pyqtSignal()
     voice_message_received = pyqtSignal(dict)
     voice_connected = pyqtSignal()
@@ -95,12 +99,29 @@ class RosBridge(QObject):
 
         t = transform.transform.translation
         q = transform.transform.rotation
+
+        # Same formulas as limo_pose_gui.py's _pose_worker().
+        roll = math.atan2(
+            2.0 * (q.w * q.x + q.y * q.z),
+            1.0 - 2.0 * (q.x * q.x + q.y * q.y),
+        )
+        pitch_sin = max(-1.0, min(1.0, 2.0 * (q.w * q.y - q.z * q.x)))
+        pitch = math.asin(pitch_sin)
         yaw = math.atan2(
             2.0 * (q.w * q.z + q.x * q.y),
             1.0 - 2.0 * (q.y * q.y + q.z * q.z),
         )
+
         self._had_pose = True
-        self.pose_updated.emit(t.x, t.y, yaw)
+        self.pose_updated.emit({
+            "x": t.x, "y": t.y, "z": t.z,
+            "qx": q.x, "qy": q.y, "qz": q.z, "qw": q.w,
+            "roll": math.degrees(roll),
+            "pitch": math.degrees(pitch),
+            "yaw": math.degrees(yaw),
+            "yaw_rad": yaw,
+            "timestamp": time.time(),
+        })
 
     def shutdown(self) -> None:
         self._voice_socket.close()
