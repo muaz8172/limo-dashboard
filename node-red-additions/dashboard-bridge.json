@@ -1,0 +1,651 @@
+[
+  {
+    "id": "dashboard_bridge_tab",
+    "type": "tab",
+    "label": "Dashboard Bridge",
+    "disabled": false,
+    "info": "Bridges the PyQt5 Windows dashboard to this flow over two WebSocket channels: /dashboard/control (commands in) and /dashboard/status (events out). See node-red-additions/README.md for wiring instructions."
+  },
+  {
+    "id": "control_ws_listener",
+    "type": "websocket-listener",
+    "path": "/dashboard/control",
+    "wholemsg": "false"
+  },
+  {
+    "id": "status_ws_listener",
+    "type": "websocket-listener",
+    "path": "/dashboard/status",
+    "wholemsg": "false"
+  },
+  {
+    "id": "comment_overview",
+    "type": "comment",
+    "z": "dashboard_bridge_tab",
+    "name": "Dashboard Bridge -- read node-red-additions/README.md before wiring",
+    "info": "",
+    "x": 140,
+    "y": 40,
+    "wires": []
+  },
+  {
+    "id": "ws_in_control",
+    "type": "websocket in",
+    "z": "dashboard_bridge_tab",
+    "name": "Dashboard Control In",
+    "server": "control_ws_listener",
+    "client": "",
+    "x": 130,
+    "y": 100,
+    "wires": [
+      [
+        "json_parse_control"
+      ]
+    ]
+  },
+  {
+    "id": "json_parse_control",
+    "type": "json",
+    "z": "dashboard_bridge_tab",
+    "name": "Parse JSON",
+    "property": "payload",
+    "action": "",
+    "pretty": false,
+    "x": 320,
+    "y": 100,
+    "wires": [
+      [
+        "switch_cmd"
+      ]
+    ]
+  },
+  {
+    "id": "switch_cmd",
+    "type": "switch",
+    "z": "dashboard_bridge_tab",
+    "name": "route on payload.cmd",
+    "property": "payload.cmd",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "eq",
+        "v": "start_mission",
+        "vt": "str"
+      },
+      {
+        "t": "eq",
+        "v": "trigger_checkpoint",
+        "vt": "str"
+      },
+      {
+        "t": "eq",
+        "v": "trigger_ocr",
+        "vt": "str"
+      },
+      {
+        "t": "eq",
+        "v": "trigger_apriltag",
+        "vt": "str"
+      }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 4,
+    "x": 520,
+    "y": 100,
+    "wires": [
+      [
+        "switch_mission"
+      ],
+      [
+        "switch_checkpoint"
+      ],
+      [
+        "stub_ocr"
+      ],
+      [
+        "stub_apriltag"
+      ]
+    ]
+  },
+  {
+    "id": "switch_mission",
+    "type": "switch",
+    "z": "dashboard_bridge_tab",
+    "name": "route on payload.mission",
+    "property": "payload.mission",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "eq",
+        "v": "1",
+        "vt": "num"
+      },
+      {
+        "t": "eq",
+        "v": "2",
+        "vt": "num"
+      }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 2,
+    "x": 740,
+    "y": 40,
+    "wires": [
+      [
+        "stub_mission_1"
+      ],
+      [
+        "stub_mission_2"
+      ]
+    ]
+  },
+  {
+    "id": "stub_mission_1",
+    "type": "function",
+    "z": "dashboard_bridge_tab",
+    "name": "TODO: wire to first checkpoint of Mission 1",
+    "func": "// Delete this stub and wire the 'switch_mission' output above\n// directly into whatever starts Mission 1 in your main\n// flow (its first checkpoint, currently 'CP1').\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 980,
+    "y": 20,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "stub_mission_2",
+    "type": "function",
+    "z": "dashboard_bridge_tab",
+    "name": "TODO: wire to first checkpoint of Mission 2",
+    "func": "// Delete this stub and wire the 'switch_mission' output above\n// directly into whatever starts Mission 2 in your main\n// flow (its first checkpoint, currently 'CP1').\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 980,
+    "y": 60,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "switch_checkpoint",
+    "type": "switch",
+    "z": "dashboard_bridge_tab",
+    "name": "route on payload.checkpoint",
+    "property": "payload.checkpoint",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "eq",
+        "v": "CP1",
+        "vt": "str"
+      },
+      {
+        "t": "eq",
+        "v": "CP2",
+        "vt": "str"
+      },
+      {
+        "t": "eq",
+        "v": "CP3",
+        "vt": "str"
+      },
+      {
+        "t": "eq",
+        "v": "CP4",
+        "vt": "str"
+      },
+      {
+        "t": "eq",
+        "v": "CP5",
+        "vt": "str"
+      },
+      {
+        "t": "eq",
+        "v": "CP6",
+        "vt": "str"
+      },
+      {
+        "t": "eq",
+        "v": "CP7",
+        "vt": "str"
+      },
+      {
+        "t": "eq",
+        "v": "CP8",
+        "vt": "str"
+      },
+      {
+        "t": "eq",
+        "v": "CP9",
+        "vt": "str"
+      },
+      {
+        "t": "eq",
+        "v": "CP10",
+        "vt": "str"
+      },
+      {
+        "t": "eq",
+        "v": "CP11",
+        "vt": "str"
+      },
+      {
+        "t": "eq",
+        "v": "CP12",
+        "vt": "str"
+      },
+      {
+        "t": "eq",
+        "v": "CP13",
+        "vt": "str"
+      },
+      {
+        "t": "eq",
+        "v": "CP14",
+        "vt": "str"
+      }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 14,
+    "x": 740,
+    "y": 220,
+    "wires": [
+      [
+        "stub_cp1"
+      ],
+      [
+        "stub_cp2"
+      ],
+      [
+        "stub_cp3"
+      ],
+      [
+        "stub_cp4"
+      ],
+      [
+        "stub_cp5"
+      ],
+      [
+        "stub_cp6"
+      ],
+      [
+        "stub_cp7"
+      ],
+      [
+        "stub_cp8"
+      ],
+      [
+        "stub_cp9"
+      ],
+      [
+        "stub_cp10"
+      ],
+      [
+        "stub_cp11"
+      ],
+      [
+        "stub_cp12"
+      ],
+      [
+        "stub_cp13"
+      ],
+      [
+        "stub_cp14"
+      ]
+    ]
+  },
+  {
+    "id": "stub_cp1",
+    "type": "function",
+    "z": "dashboard_bridge_tab",
+    "name": "TODO: wire to your existing CP1 node",
+    "func": "// Delete this stub and wire the 'switch_checkpoint' output above\n// directly into your existing 'CP1' function node (the one\n// currently fed by a manual Inject node in your main flow).\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 980,
+    "y": 200,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "stub_cp2",
+    "type": "function",
+    "z": "dashboard_bridge_tab",
+    "name": "TODO: wire to your existing CP2 node",
+    "func": "// Delete this stub and wire the 'switch_checkpoint' output above\n// directly into your existing 'CP2' function node (the one\n// currently fed by a manual Inject node in your main flow).\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 980,
+    "y": 236,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "stub_cp3",
+    "type": "function",
+    "z": "dashboard_bridge_tab",
+    "name": "TODO: wire to your existing CP3 node",
+    "func": "// Delete this stub and wire the 'switch_checkpoint' output above\n// directly into your existing 'CP3' function node (the one\n// currently fed by a manual Inject node in your main flow).\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 980,
+    "y": 272,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "stub_cp4",
+    "type": "function",
+    "z": "dashboard_bridge_tab",
+    "name": "TODO: wire to your existing CP4 node",
+    "func": "// Delete this stub and wire the 'switch_checkpoint' output above\n// directly into your existing 'CP4' function node (the one\n// currently fed by a manual Inject node in your main flow).\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 980,
+    "y": 308,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "stub_cp5",
+    "type": "function",
+    "z": "dashboard_bridge_tab",
+    "name": "TODO: wire to your existing CP5 node",
+    "func": "// Delete this stub and wire the 'switch_checkpoint' output above\n// directly into your existing 'CP5' function node (the one\n// currently fed by a manual Inject node in your main flow).\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 980,
+    "y": 344,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "stub_cp6",
+    "type": "function",
+    "z": "dashboard_bridge_tab",
+    "name": "TODO: wire to your existing CP6 node",
+    "func": "// Delete this stub and wire the 'switch_checkpoint' output above\n// directly into your existing 'CP6' function node (the one\n// currently fed by a manual Inject node in your main flow).\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 980,
+    "y": 380,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "stub_cp7",
+    "type": "function",
+    "z": "dashboard_bridge_tab",
+    "name": "TODO: wire to your existing CP7 node",
+    "func": "// Delete this stub and wire the 'switch_checkpoint' output above\n// directly into your existing 'CP7' function node (the one\n// currently fed by a manual Inject node in your main flow).\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 980,
+    "y": 416,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "stub_cp8",
+    "type": "function",
+    "z": "dashboard_bridge_tab",
+    "name": "TODO: wire to your existing CP8 node",
+    "func": "// Delete this stub and wire the 'switch_checkpoint' output above\n// directly into your existing 'CP8' function node (the one\n// currently fed by a manual Inject node in your main flow).\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 980,
+    "y": 452,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "stub_cp9",
+    "type": "function",
+    "z": "dashboard_bridge_tab",
+    "name": "TODO: wire to your existing CP9 node",
+    "func": "// Delete this stub and wire the 'switch_checkpoint' output above\n// directly into your existing 'CP9' function node (the one\n// currently fed by a manual Inject node in your main flow).\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 980,
+    "y": 488,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "stub_cp10",
+    "type": "function",
+    "z": "dashboard_bridge_tab",
+    "name": "TODO: wire to your existing CP10 node",
+    "func": "// Delete this stub and wire the 'switch_checkpoint' output above\n// directly into your existing 'CP10' function node (the one\n// currently fed by a manual Inject node in your main flow).\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 980,
+    "y": 524,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "stub_cp11",
+    "type": "function",
+    "z": "dashboard_bridge_tab",
+    "name": "TODO: wire to your existing CP11 node",
+    "func": "// Delete this stub and wire the 'switch_checkpoint' output above\n// directly into your existing 'CP11' function node (the one\n// currently fed by a manual Inject node in your main flow).\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 980,
+    "y": 560,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "stub_cp12",
+    "type": "function",
+    "z": "dashboard_bridge_tab",
+    "name": "TODO: wire to your existing CP12 node",
+    "func": "// Delete this stub and wire the 'switch_checkpoint' output above\n// directly into your existing 'CP12' function node (the one\n// currently fed by a manual Inject node in your main flow).\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 980,
+    "y": 596,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "stub_cp13",
+    "type": "function",
+    "z": "dashboard_bridge_tab",
+    "name": "TODO: wire to your existing CP13 node",
+    "func": "// Delete this stub and wire the 'switch_checkpoint' output above\n// directly into your existing 'CP13' function node (the one\n// currently fed by a manual Inject node in your main flow).\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 980,
+    "y": 632,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "stub_cp14",
+    "type": "function",
+    "z": "dashboard_bridge_tab",
+    "name": "TODO: wire to your existing CP14 node",
+    "func": "// Delete this stub and wire the 'switch_checkpoint' output above\n// directly into your existing 'CP14' function node (the one\n// currently fed by a manual Inject node in your main flow).\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 980,
+    "y": 668,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "stub_ocr",
+    "type": "function",
+    "z": "dashboard_bridge_tab",
+    "name": "TODO: wire to your existing OCR trigger",
+    "func": "// Delete this stub and wire the 'switch_cmd' trigger_ocr output\n// directly into your existing OCR Inject/function node.\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 740,
+    "y": 760,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "stub_apriltag",
+    "type": "function",
+    "z": "dashboard_bridge_tab",
+    "name": "TODO: wire to your existing AprilTag trigger",
+    "func": "// Delete this stub and wire the 'switch_cmd' trigger_apriltag output\n// directly into your existing AprilTag Inject/function node.\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 740,
+    "y": 810,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "comment_status",
+    "type": "comment",
+    "z": "dashboard_bridge_tab",
+    "name": "Status side: add 'link out' nodes in your main flow targeting 'Dashboard Status In' below",
+    "info": "At each point you want the dashboard to know about (a checkpoint's Switch\noutput, the OCR Switch output, the AprilTag Switch output, mission end),\nadd a small Change/Function node that shapes msg.payload into one of the\nJSON schemas in the README, then a 'link out' node targeting this flow's\n'Dashboard Status In' link-in node (pick it from the dropdown by name --\nno need to know its id).",
+    "x": 160,
+    "y": 920,
+    "wires": []
+  },
+  {
+    "id": "link_in_status",
+    "type": "link in",
+    "z": "dashboard_bridge_tab",
+    "name": "Dashboard Status In",
+    "links": [],
+    "x": 140,
+    "y": 980,
+    "wires": [
+      [
+        "format_status_json"
+      ]
+    ]
+  },
+  {
+    "id": "format_status_json",
+    "type": "function",
+    "z": "dashboard_bridge_tab",
+    "name": "Format status JSON",
+    "func": "msg.payload = JSON.stringify(msg.payload);\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 360,
+    "y": 980,
+    "wires": [
+      [
+        "ws_out_status"
+      ]
+    ]
+  },
+  {
+    "id": "ws_out_status",
+    "type": "websocket out",
+    "z": "dashboard_bridge_tab",
+    "name": "Dashboard Status Out",
+    "server": "status_ws_listener",
+    "client": "",
+    "x": 580,
+    "y": 980
+  }
+]
