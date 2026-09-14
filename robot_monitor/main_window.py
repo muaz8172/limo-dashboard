@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import (
     QLabel,
     QMainWindow,
     QPlainTextEdit,
+    QTabWidget,
     QVBoxLayout,
     QWidget,
 )
@@ -60,14 +61,11 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout(central)
         layout.addWidget(self._build_header())
 
-        body = QHBoxLayout()
-        body.addWidget(self._build_camera_column(), 1)
-        body.addWidget(self._build_map_panel(), 2)
+        tabs = QTabWidget()
+        tabs.addTab(self._build_monitor_tab(), "Monitor")
         self.pose_panel = PosePanel()
-        body.addWidget(self.pose_panel, 1)
-        layout.addLayout(body, 1)
-
-        layout.addWidget(self._build_voice_panel())
+        tabs.addTab(self.pose_panel, "Robot Pose")
+        layout.addWidget(tabs, 1)
 
         self.setCentralWidget(central)
 
@@ -83,6 +81,18 @@ class MainWindow(QMainWindow):
     def _on_pose_updated(self, pose: dict) -> None:
         self.map_widget.set_pose(pose["x"], pose["y"], pose["yaw_rad"])
         self.pose_panel.set_pose(pose)
+
+    def _build_monitor_tab(self) -> QWidget:
+        tab = QWidget()
+        layout = QVBoxLayout(tab)
+
+        body = QHBoxLayout()
+        body.addWidget(self._build_camera_column(), 1)
+        body.addWidget(self._build_map_panel(), 2)
+        layout.addLayout(body, 1)
+
+        layout.addWidget(self._build_voice_panel())
+        return tab
 
     def _build_header(self) -> QWidget:
         header = QWidget()

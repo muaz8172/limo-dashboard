@@ -18,7 +18,9 @@ from PyQt5.QtWidgets import (
 )
 
 STALE_AFTER_SEC = 0.5
-STATUS_REFRESH_MS = 200
+# Only used to notice when updates STOP arriving (staleness) -- an actual
+# new pose refreshes the status immediately via set_pose(), no polling wait.
+STATUS_REFRESH_MS = 50
 
 GREEN = "#22C55E"
 YELLOW = "#FACC15"
@@ -87,6 +89,7 @@ class PosePanel(QGroupBox):
         self._pose = pose
         for key, (label, fmt) in self._value_labels.items():
             label.setText(fmt.format(pose[key]))
+        self._refresh_status()
 
     def _refresh_status(self) -> None:
         if self._pose is None:
