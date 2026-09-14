@@ -10,6 +10,7 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
+from robot_monitor.map_widget import MapWidget
 from robot_monitor.ros_bridge import RosBridge
 
 CONNECTED_STYLE = "color: #2e7d32; font-weight: bold;"
@@ -69,6 +70,9 @@ class MainWindow(QMainWindow):
 
         self.bridge.rgb_frame_received.connect(self.rgb_feed.set_frame)
         self.bridge.robot_description_received.connect(self._on_robot_description)
+        self.bridge.map_received.connect(self.map_widget.set_map)
+        self.bridge.pose_updated.connect(self.map_widget.set_pose)
+        self.bridge.pose_lost.connect(self.map_widget.clear_pose)
         self.bridge.voice_connected.connect(self._on_voice_connected)
         self.bridge.voice_disconnected.connect(self._on_voice_disconnected)
         self.bridge.voice_message_received.connect(self._on_voice_message)
@@ -108,13 +112,8 @@ class MainWindow(QMainWindow):
     def _build_map_panel(self) -> QWidget:
         group = QGroupBox("Live Map / Position")
         layout = QVBoxLayout(group)
-        placeholder = QLabel(
-            "Map + robot position rendering not wired up yet --\n"
-            "pending integration of limo_pose_gui.py."
-        )
-        placeholder.setAlignment(Qt.AlignCenter)
-        placeholder.setStyleSheet("color: #777;")
-        layout.addWidget(placeholder)
+        self.map_widget = MapWidget()
+        layout.addWidget(self.map_widget)
         return group
 
     def _build_voice_panel(self) -> QWidget:
