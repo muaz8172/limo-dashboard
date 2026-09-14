@@ -8,7 +8,8 @@ PyQt5 dashboard (Windows) for a LIMO robot running ROS2 Humble / Node-RED (Ubunt
 - `config/missions.json` -- shared checkpoint library + Mission 1 / Mission 2 definitions (checkpoints referenced by route, not duplicated per mission)
 - `core/` -- `bridge_client.py` (WebSocket client), `settings.py` (remembers robot host/port), `mission_state.py` (live mission progress), `grid_numbering.py` (gamefield cell numbering, matches the robot's own mapping: 1 = bottom-left, 16 = top-right)
 - `ui/` -- `main_window.py`, `mission_tab.py`, `checkpoint_button.py`, `gamefield_widget.py`
-- `node-red-additions/` -- importable Node-RED flow (`dashboard-bridge.json`) adding the `/dashboard/control` and `/dashboard/status` websocket nodes, plus a `README.md` with import/wiring/deploy steps
+- `node-red-additions/` -- snapshot + docs of the bridge flow already deployed on the robot (adds `/dashboard/control` and `/dashboard/status`, wired directly into MISSION 1 / MISSION 2's real nodes)
+- `scripts/deploy_bridge_flow.py` -- deploys the bridge flow onto a robot's Node-RED via its Admin API (additive-only, validated before sending)
 - `scripts/deploy_to_robot.ps1` -- SCP helper for pushing a single file to the robot
 
 ## Windows setup
@@ -26,7 +27,7 @@ Enter the robot's current IP and port `1880` in the connection bar (this changes
 git clone https://github.com/muaz8172/limo-dashboard.git
 ```
 
-Then follow `node-red-additions/README.md` to import `dashboard-bridge.json` into the robot's Node-RED editor and wire it into the existing checkpoint/OCR/AprilTag flow.
+The bridge flow is already deployed on the current robot (10.21.215.131). To (re)deploy it -- e.g. after a Node-RED reset, or on a different robot with the same flow structure -- see `node-red-additions/README.md` and run `scripts/deploy_bridge_flow.py`.
 
 ## Checkpoint numbering
 

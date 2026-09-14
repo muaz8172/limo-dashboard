@@ -90,12 +90,16 @@ class MissionTab(QWidget):
         layout.addWidget(log_group, 1)
 
     def _trigger_checkpoint(self, checkpoint_id: str) -> None:
+        # Node-RED wires the same checkpoint id to a DIFFERENT real node per
+        # mission (e.g. Mission 1's "CP1" and Mission 2's "CP1" are separate
+        # nav goals), so the mission must be included to disambiguate.
+        mission = int(self.mission_id)
         if checkpoint_id == "OCR":
-            command = {"cmd": "trigger_ocr"}
+            command = {"cmd": "trigger_ocr", "mission": mission}
         elif checkpoint_id == "APRILTAG":
-            command = {"cmd": "trigger_apriltag"}
+            command = {"cmd": "trigger_apriltag", "mission": mission}
         else:
-            command = {"cmd": "trigger_checkpoint", "checkpoint": checkpoint_id}
+            command = {"cmd": "trigger_checkpoint", "mission": mission, "checkpoint": checkpoint_id}
 
         if self.bridge_client.send_command(command):
             self.state.mark_checkpoint_triggered(checkpoint_id)

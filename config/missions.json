@@ -1,23 +1,27 @@
 {
-  "_note": "cell_number follows the robot's own mapping picture: 1 = bottom-left, increasing left-to-right then bottom-to-top up to 16 = top-right (4x4 grid). Values below are a best-guess placeholder walk through the field in mission order -- compare against the real robot mapping image and correct any checkpoint that's in the wrong cell before competition.",
+  "_note": "cell_number follows the robot's own mapping picture: 1 = bottom-left, increasing left-to-right then bottom-to-top up to 16 = top-right (4x4 grid). Values are a best-guess placeholder walk through the field -- compare against the real robot mapping image and correct any checkpoint that's in the wrong cell before competition. Mission 1's route (CP1, CP2_3, CP4_5, CP6, CP7_8, CP9, CP10_11, CP12, CP13) reflects the robot's ACTUAL live Node-RED chain, traced 2026-09-14 from the deployed flow at 10.21.215.131:1880 -- several physical checkpoints are combined into single nav goals there, unlike Mission 2 which keeps them individual. The same checkpoint id (e.g. 'CP1') maps to a DIFFERENT real Node-RED node depending on which mission it's used in -- the dashboard always sends the mission alongside the checkpoint id to disambiguate (see core/bridge_client.py usage in ui/mission_tab.py).",
 
   "checkpoints": {
-    "CP1":  {"label": "Checkpoint 1",  "group": "P1_TO_P2", "cell_number": 1},
-    "CP2":  {"label": "Checkpoint 2",  "group": "P1_TO_P2", "cell_number": 2},
-    "CP3":  {"label": "Checkpoint 3",  "group": "P1_TO_P2", "cell_number": 3},
-    "CP4":  {"label": "Checkpoint 4",  "group": "P1_TO_P2", "cell_number": 4},
-    "OCR":  {"label": "Text Detection (P2)", "group": "VISION", "cell_number": 5},
-    "CP5":  {"label": "Checkpoint 5",  "group": "P2_TO_P3", "cell_number": 6},
-    "CP6":  {"label": "Checkpoint 6",  "group": "P2_TO_P3", "cell_number": 7},
-    "CP7":  {"label": "Checkpoint 7",  "group": "P2_TO_P3", "cell_number": 8},
-    "CP8":  {"label": "Checkpoint 8",  "group": "P2_TO_P3", "cell_number": 9},
-    "APRILTAG": {"label": "AprilTag (P3)", "group": "VISION", "cell_number": 10},
-    "CP9":  {"label": "Checkpoint 9",  "group": "P3_TO_P1", "cell_number": 11},
-    "CP10": {"label": "Checkpoint 10", "group": "P3_TO_P1", "cell_number": 12},
-    "CP11": {"label": "Checkpoint 11", "group": "P3_TO_P1", "cell_number": 13},
-    "CP12": {"label": "Checkpoint 12", "group": "P3_TO_P1", "cell_number": 14},
-    "CP13": {"label": "Checkpoint 13", "group": "P3_TO_P1", "cell_number": 15},
-    "CP14": {"label": "Checkpoint 14", "group": "P3_TO_P1", "cell_number": 16}
+    "CP1":     {"label": "Checkpoint 1",      "group": "P1_TO_P2", "cell_number": 1},
+    "CP2":     {"label": "Checkpoint 2",      "group": "P1_TO_P2", "cell_number": 2},
+    "CP2_3":   {"label": "Checkpoint 2-3",    "group": "P1_TO_P2", "cell_number": 2},
+    "CP3":     {"label": "Checkpoint 3",      "group": "P1_TO_P2", "cell_number": 3},
+    "CP4":     {"label": "Checkpoint 4",      "group": "P1_TO_P2", "cell_number": 4},
+    "CP4_5":   {"label": "Checkpoint 4-5",    "group": "P1_TO_P2", "cell_number": 4},
+    "OCR":     {"label": "Text Detection (P2)", "group": "VISION", "cell_number": 5},
+    "CP5":     {"label": "Checkpoint 5",      "group": "P2_TO_P3", "cell_number": 6},
+    "CP6":     {"label": "Checkpoint 6",      "group": "P2_TO_P3", "cell_number": 7},
+    "CP7":     {"label": "Checkpoint 7",      "group": "P2_TO_P3", "cell_number": 8},
+    "CP7_8":   {"label": "Checkpoint 7-8",    "group": "P2_TO_P3", "cell_number": 8},
+    "CP8":     {"label": "Checkpoint 8",      "group": "P2_TO_P3", "cell_number": 9},
+    "APRILTAG": {"label": "AprilTag (P3)",    "group": "VISION", "cell_number": 10},
+    "CP9":     {"label": "Checkpoint 9",      "group": "P3_TO_P1", "cell_number": 11},
+    "CP10":    {"label": "Checkpoint 10",     "group": "P3_TO_P1", "cell_number": 12},
+    "CP10_11": {"label": "Checkpoint 10-11",  "group": "P3_TO_P1", "cell_number": 12},
+    "CP11":    {"label": "Checkpoint 11",     "group": "P3_TO_P1", "cell_number": 13},
+    "CP12":    {"label": "Checkpoint 12",     "group": "P3_TO_P1", "cell_number": 14},
+    "CP13":    {"label": "Checkpoint 13",     "group": "P3_TO_P1", "cell_number": 15},
+    "CP14":    {"label": "Checkpoint 14",     "group": "P3_TO_P1", "cell_number": 16}
   },
 
   "landmarks": {
@@ -36,7 +40,7 @@
         "Return to P1",
         "Stop automatically"
       ],
-      "route": ["CP1", "CP2", "CP3", "CP4", "CP5", "CP6", "CP7", "CP8", "CP9", "CP10", "CP11", "CP12", "CP13", "CP14"]
+      "route": ["CP1", "CP2_3", "CP4_5", "CP6", "CP7_8", "CP9", "CP10_11", "CP12", "CP13"]
     },
     "2": {
       "name": "Mission 2 – Vision & Toll",
