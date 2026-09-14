@@ -13,6 +13,7 @@ import rclpy.time
 from PyQt5.QtCore import QObject, QUrl, pyqtSignal
 from PyQt5.QtGui import QImage
 from PyQt5.QtWebSockets import QWebSocket
+from map_msgs.msg import OccupancyGridUpdate
 from nav_msgs.msg import OccupancyGrid
 from rclpy.qos import DurabilityPolicy, QoSProfile, qos_profile_sensor_data
 from sensor_msgs.msg import Image
@@ -20,10 +21,14 @@ from std_msgs.msg import String
 from tf2_ros import Buffer, TransformException, TransformListener
 
 from robot_monitor.image_utils import imgmsg_to_qimage
+from robot_monitor.map_utils import OccupancyGridState
 
 RGB_TOPIC = "/limo/camera/color/image_raw"
 ROBOT_DESCRIPTION_TOPIC = "/limo/robot_description"
-MAP_TOPIC = "/map"
+MAP_TOPIC = "/limo/map"
+MAP_UPDATES_TOPIC = "/limo/map_updates"
+CONTOUR_MAP_TOPIC = "/limo/contour_map"
+CONTOUR_MAP_UPDATES_TOPIC = "/limo/contour_map_updates"
 VOICE_WS_URL = "ws://localhost:1880/voice/muaz"
 
 # Same frames used by robot_pose_gui/limo_pose_gui.py on the robot.
@@ -34,7 +39,8 @@ ROBOT_FRAME = "limo/base_footprint"
 class RosBridge(QObject):
     rgb_frame_received = pyqtSignal(QImage)
     robot_description_received = pyqtSignal(str)
-    map_received = pyqtSignal(object)  # raw nav_msgs/OccupancyGrid
+    map_received = pyqtSignal(QImage, object)  # image, MapMeta -- base grid + patches merged in
+    contour_map_received = pyqtSignal(QImage, object)
     # dict: x, y, z, qx, qy, qz, qw, roll, pitch, yaw (degrees), timestamp --
     # same shape as robot_pose_gui/limo_pose_gui.py's pose dict, so its
     # numeric readout ports over directly instead of running as a second app.
@@ -60,10 +66,28 @@ class RosBridge(QObject):
             String, ROBOT_DESCRIPTION_TOPIC, self._on_description, description_qos
         )
 
+        # Base grid is latched (transient-local); incremental updates are
+        # plain reliable messages published only when a region changes --
+        # re-requesting the whole grid every time isn't what's actually on
+        # the wire, so both topics are subscribed and merged locally.
         map_qos = QoSProfile(depth=1)
         map_qos.durability = DurabilityPolicy.TRANSIENT_LOCAL
+        update_qos = QoSProfile(depth=10)
+
+        self._map_state = OccupancyGridState()
         self._map_sub = self.node.create_subscription(
             OccupancyGrid, MAP_TOPIC, self._on_map, map_qos
+        )
+        self._map_update_sub = self.node.create_subscription(
+            OccupancyGridUpdate, MAP_UPDATES_TOPIC, self._on_map_update, update_qos
+        )
+
+        self._contour_state = OccupancyGridState()
+        self._contour_sub = self.node.create_subscription(
+            OccupancyGrid, CONTOUR_MAP_TOPIC, self._on_contour_map, map_qos
+        )
+        self._contour_update_sub = self.node.create_subscription(
+            OccupancyGridUpdate, CONTOUR_MAP_UPDATES_TOPIC, self._on_contour_map_update, update_qos
         )
 
         # Robot position comes from TF (map -> limo/base_footprint), same
@@ -139,7 +163,20 @@ class RosBridge(QObject):
         self.robot_description_received.emit(msg.data)
 
     def _on_map(self, msg: OccupancyGrid) -> None:
-        self.map_received.emit(msg)
+        self._map_state.reset_from_grid(msg)
+        self.map_received.emit(self._map_state.to_qimage(), self._map_state.meta())
+
+    def _on_map_update(self, msg: OccupancyGridUpdate) -> None:
+        if self._map_state.apply_update(msg):
+            self.map_received.emit(self._map_state.to_qimage(), self._map_state.meta())
+
+    def _on_contour_map(self, msg: OccupancyGrid) -> None:
+        self._contour_state.reset_from_grid(msg)
+        self.contour_map_received.emit(self._contour_state.to_qimage(), self._contour_state.meta())
+
+    def _on_contour_map_update(self, msg: OccupancyGridUpdate) -> None:
+        if self._contour_state.apply_update(msg):
+            self.contour_map_received.emit(self._contour_state.to_qimage(), self._contour_state.meta())
 
     def _on_voice_message(self, message: str) -> None:
         try:

@@ -1,10 +1,8 @@
 import math
 
 from PyQt5.QtCore import QPointF, Qt
-from PyQt5.QtGui import QColor, QPainter, QPen
+from PyQt5.QtGui import QColor, QImage, QPainter, QPen
 from PyQt5.QtWidgets import QLabel, QWidget
-
-from robot_monitor.map_utils import occupancy_grid_to_qimage
 
 ROBOT_RADIUS_PX = 9
 HEADING_LENGTH_PX = 22
@@ -23,12 +21,13 @@ class MapWidget(QWidget):
         self._meta = None
         self._pose = None  # (x, y, yaw) in the map frame, or None
 
-        self._empty_label = QLabel("Waiting for /map ...", self)
+        self._empty_label = QLabel("Waiting for map data...", self)
         self._empty_label.setAlignment(Qt.AlignCenter)
         self._empty_label.setStyleSheet("color: #777;")
 
-    def set_map(self, msg) -> None:
-        self._map_image, self._meta = occupancy_grid_to_qimage(msg)
+    def set_map(self, image: QImage, meta) -> None:
+        self._map_image = image
+        self._meta = meta
         self._empty_label.hide()
         self.update()
 

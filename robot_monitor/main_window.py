@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import (
     QLabel,
     QMainWindow,
     QPlainTextEdit,
+    QPushButton,
     QTabWidget,
     QVBoxLayout,
     QWidget,
@@ -57,6 +58,9 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("LIMO Robot Monitor")
         self.resize(1200, 800)
 
+        self._current_layer = "map"
+        self._latest_layers = {"map": (None, None), "contour": (None, None)}
+
         central = QWidget()
         layout = QVBoxLayout(central)
         layout.addWidget(self._build_header())
@@ -71,7 +75,8 @@ class MainWindow(QMainWindow):
 
         self.bridge.rgb_frame_received.connect(self.rgb_feed.set_frame)
         self.bridge.robot_description_received.connect(self._on_robot_description)
-        self.bridge.map_received.connect(self.map_widget.set_map)
+        self.bridge.map_received.connect(lambda img, meta: self._on_layer_received("map", img, meta))
+        self.bridge.contour_map_received.connect(lambda img, meta: self._on_layer_received("contour", img, meta))
         self.bridge.pose_updated.connect(self._on_pose_updated)
         self.bridge.pose_lost.connect(self.map_widget.clear_pose)
         self.bridge.voice_connected.connect(self._on_voice_connected)
@@ -81,6 +86,19 @@ class MainWindow(QMainWindow):
     def _on_pose_updated(self, pose: dict) -> None:
         self.map_widget.set_pose(pose["x"], pose["y"], pose["yaw_rad"])
         self.pose_panel.set_pose(pose)
+
+    def _on_layer_received(self, name: str, image: QImage, meta) -> None:
+        self._latest_layers[name] = (image, meta)
+        if name == self._current_layer:
+            self.map_widget.set_map(image, meta)
+
+    def _switch_layer(self, name: str) -> None:
+        self._current_layer = name
+        self.map_layer_map_btn.setChecked(name == "map")
+        self.map_layer_contour_btn.setChecked(name == "contour")
+        image, meta = self._latest_layers[name]
+        if image is not None:
+            self.map_widget.set_map(image, meta)
 
     def _build_monitor_tab(self) -> QWidget:
         tab = QWidget()
@@ -129,6 +147,22 @@ class MainWindow(QMainWindow):
     def _build_map_panel(self) -> QWidget:
         group = QGroupBox("Live Map / Position")
         layout = QVBoxLayout(group)
+
+        layer_row = QHBoxLayout()
+        self.map_layer_map_btn = QPushButton("Map")
+        self.map_layer_map_btn.setCheckable(True)
+        self.map_layer_map_btn.setChecked(True)
+        self.map_layer_map_btn.clicked.connect(lambda: self._switch_layer("map"))
+        layer_row.addWidget(self.map_layer_map_btn)
+
+        self.map_layer_contour_btn = QPushButton("Contour")
+        self.map_layer_contour_btn.setCheckable(True)
+        self.map_layer_contour_btn.clicked.connect(lambda: self._switch_layer("contour"))
+        layer_row.addWidget(self.map_layer_contour_btn)
+
+        layer_row.addStretch()
+        layout.addLayout(layer_row)
+
         self.map_widget = MapWidget()
         layout.addWidget(self.map_widget)
         return group
